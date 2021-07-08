@@ -51,7 +51,6 @@ export const OrgCanvas = () => {
       name: '123',
       type: 'node',
     }])
-    console.log('nodes', orgChart.nodes[0])
     orgChart.nodes[0].appendNodes([{
       id: '124',
       name: '124',
@@ -60,8 +59,20 @@ export const OrgCanvas = () => {
       id: '125',
       name: '125',
       type: 'node',
+    }, {
+      id: '126',
+      name: '126',
+      type: 'node',
+    }, {
+      id: '127',
+      name: '127',
+      type: 'node',
+    }, {
+      id: '128',
+      name: '128',
+      type: 'node',
     }])
-  }, [])
+  }, [orgChart])
 
   return <div id="org-canvas" style={style}></div>
 }

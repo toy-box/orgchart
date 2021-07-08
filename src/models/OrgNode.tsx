@@ -65,6 +65,8 @@ export class OrgNode {
   visible?: boolean
   x: number
   y: number
+  width: number
+  height: number
   orgChart: OrgChart
   contentProps?: Record<string, any>
 
@@ -79,6 +81,8 @@ export class OrgNode {
     this.contentProps = node.contentProps
     this.mounted = false
     this.visible = false
+    this.width = 120
+    this.height = 180
     OrgNodes.set(this.id, this)
     this.makeObservable()
   }
@@ -92,6 +96,8 @@ export class OrgNode {
       contentProps: observable.deep,
       x: observable.ref,
       y: observable.ref,
+      width: observable.ref,
+      height: observable.ref,
       nodeMeta: observable.computed,
       setPostion: batch,
       appendNodes: batch,
@@ -99,21 +105,35 @@ export class OrgNode {
     })
   }
 
+
+  protected addChildren(nodes: OrgNode[]) {
+    this.children.concat(...nodes.filter(n => this.children.some(child => child === n)))
+  }
+
   get nodeMeta() {
     return {
       id: this.id,
       x: this.x,
       y: this.y,
+      width: this.width,
+      height: this.height,
       shape: 'react-shape',
-      component(node: Node) {
-        return <OrgNodeCom name={node.id} />
+      component: (node: Node) => {
+        return <OrgNodeCom name={node.id} orgNode={this} />
       },
     }
   }
 
+  get firstChild() {
+    return this.children.reduce((prev, current) => prev.x <= current.x ? prev : current)
+  }
+
+  get lastChild() {
+    return this.children.reduce((prev, current) => prev.x <= current.x ? prev : current)
+  }
+
   mount() {
     if (!this.mounted) {
-      this.orgChart.mountNode(this)
       this.mounted = true
     }
   }
@@ -122,23 +142,16 @@ export class OrgNode {
     nodes.forEach((child) => {
       const newNode = new OrgNode(child, this)
       this.children.push(newNode)
-      this.orgChart.appendNode(newNode)
-      this.orgChart.appendEdge(new OrgEdge({
-        source: this.id,
-        target: newNode.id,
-      }, this.orgChart))
+      this.orgChart.appendChildNode(newNode, this)
     })
   }
 
-  addChildren(nodes: OrgNode[]) {
-    this.children.concat(...nodes.filter(n => this.children.some(child => child === n)))
-  }
-
   setPostion(x: number, y: number) {
-    this.x = x
-    this.y = y
-    console.log('pos', this.x, this.y)
-    this.orgChart.setNodePosition(this)
+    if (this.x !== x || this.y !== y) {
+      this.x = x
+      this.y = y
+      this.orgChart.setNodePosition(this)
+    }
   }
 
   contains(...nodes: OrgNode[]) {

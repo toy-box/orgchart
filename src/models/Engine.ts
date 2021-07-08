@@ -10,18 +10,14 @@ import { OrgChart } from './OrgChart'
 export class Engine extends EventBus {
   id: string
 
-  props: IEngineProps<Engine>
+  props: IEngineProps<EventBus>
 
   orgChart: OrgChart
 
-  constructor(props: IEngineProps<Engine>) {
+  constructor(props: IEngineProps<EventBus>) {
     super(props)
     this.props = props
-    this.init()
     this.id = uid()
-  }
-
-  init() {
     this.orgChart = new OrgChart(this)
   }
 

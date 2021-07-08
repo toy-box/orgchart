@@ -1,5 +1,4 @@
 import {
-  batch,
   define,
   observable,
 } from '@formily/reactive'
@@ -48,7 +47,6 @@ export class OrgEdge {
 
   mount() {
     if (!this.mounted) {
-      this.orgChart.mountEdge(this)
       this.mounted = true
     }
   }
