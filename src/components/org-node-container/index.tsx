@@ -1,15 +1,15 @@
 import React, { CSSProperties, FC, useCallback } from 'react'
 import { observer } from '@formily/reactive-react'
+import { uid } from '@toy-box/toybox-shared'
 import { OrgNode } from '../../models'
 import './styles'
-import { uid } from '@toy-box/toybox-shared'
 
 export interface IOrgNodeProps {
   name: string
   orgNode: OrgNode
 }
 
-export const OrgNodeCom: FC<IOrgNodeProps> = observer(({ name, orgNode }) => {
+export const OrgNodeContainer: FC<IOrgNodeProps> = observer(({ name, orgNode }) => {
   const style: CSSProperties = {
     width: '120px',
     height: '180px',

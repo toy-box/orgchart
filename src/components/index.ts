@@ -1,2 +1,2 @@
 export * from './org-canvas'
-export * from './org-node'
+export * from './org-node-container'

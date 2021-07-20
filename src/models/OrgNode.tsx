@@ -7,8 +7,7 @@ import {
 import { uid } from '@formily/shared'
 import { Node } from '@antv/x6'
 import { OrgChart } from './OrgChart'
-import { OrgNodeCom } from '../components/org-node'
-import { OrgEdge } from './OrgEdge'
+import { OrgNodeContainer } from '../components/org-node-container'
 
 const OrgNodes = new Map<string, OrgNode>()
 
@@ -51,6 +50,7 @@ export interface IOrgNode {
   parent?: IOrgNode
   root?: IOrgNode
   contentProps?: Record<string, any>
+  children?: INodeProps[]
 }
 
 export class OrgNode {
@@ -105,6 +105,9 @@ export class OrgNode {
     })
   }
 
+  protected appendChildren(children: IOrgNode[]) {
+    this.addChildren(children.map(child => new OrgNode(child, this, this.orgChart)))
+  }
 
   protected addChildren(nodes: OrgNode[]) {
     this.children.concat(...nodes.filter(n => this.children.some(child => child === n)))
@@ -119,7 +122,7 @@ export class OrgNode {
       height: this.height,
       shape: 'react-shape',
       component: (node: Node) => {
-        return <OrgNodeCom name={node.id} orgNode={this} />
+        return <OrgNodeContainer name={node.id} orgNode={this} />
       },
     }
   }

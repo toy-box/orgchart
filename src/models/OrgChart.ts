@@ -14,7 +14,10 @@ import { LifeCycleTypes } from '../types'
 
 export interface IOrgChart {
   rootNodes?: IOrgNode[]
+  graphLabel?: GraphLabel
 }
+
+export type GraphLabel = dagre.GraphLabel
 
 export class OrgChart {
   engine: Engine
@@ -38,7 +41,7 @@ export class OrgChart {
     this.editable = false
     this.heart = new Heart({ lifecycles: [], context: this })
     this.dg = new dagre.graphlib.Graph()
-    this.dg.setGraph({ rankdir: 'TB', nodesep: 16, ranksep: 32 })
+    this.dg.setGraph({ rankdir: 'TB', nodesep: 16, ranksep: 32, ranker: 'tight-tree' })
   }
 
   protected makeObservable() {
@@ -48,16 +51,24 @@ export class OrgChart {
       unmounted: observable.ref,
       editable: observable.ref,
       nodes: observable.shallow,
+      setGraphLabel: batch,
       appendRootNodes: batch,
       appendChildNode: batch,
       appendNode: batch,
       setNodePosition: batch,
       setNodeVisble: batch,
-      mountNode: batch,
+      // mountNode: batch,
       setEdgeVertices: batch,
       setGraph: batch,
       notify: batch,
     })
+  }
+
+  setGraphLabel = (graphLabel: GraphLabel) => {
+    this.dg.setGraph(graphLabel)
+    if (this.dg.nodeCount() > 0) {
+      this.layout()
+    }
   }
 
   addGraphNode = (node: Node.Metadata) => {
@@ -124,23 +135,6 @@ export class OrgChart {
     }
   }
 
-  mountNode = (node: OrgNode) => {
-    this.dg.setNode(node.id, { width: 120, height: 180 })
-    dagre.layout(this.dg)
-    this.dg.nodes().forEach(id => {
-      const node = this.nodes.find(n => n.id === id)
-      const pos = this.dg.node(id)
-      node.setPostion(pos.x, pos.y)
-    })
-    this.dg.edges().forEach(edge => {
-      const orgEdge = this.edges.find(e => e.sourceId === edge.v && e.targetId === edge.w)
-      const source = this.getNodeById(orgEdge.sourceId)
-      const target = this.getNodeById(orgEdge.targetId)
-      const graphEdge = this.graph.getCellById(orgEdge.id)
-      graphEdge?.isEdge() && this.setEdgeVertices(graphEdge, source, target)
-    })
-  }
-
   appendRootNodes = (nodes: IOrgNode[]) => {
     nodes.forEach(node => {
       this.appendNode(new OrgNode(node, undefined, this))
@@ -164,13 +158,6 @@ export class OrgChart {
     })
   }
 
-  // appendEdge = (edge: OrgEdge) => {
-  //   if (!this.edges.some(e => e === edge)) {
-  //     this.edges.push(edge)
-  //     edge.mount()
-  //   }
-  // }
-
   appendChildNode = (child: OrgNode, parent: OrgNode,) => {
     if (!this.nodes.some(n => n === child)) {
       this.nodes.push(child)
@@ -189,7 +176,6 @@ export class OrgChart {
     dagre.layout(this.dg)
     this.dg.nodes().forEach(id => {
       const node = this.nodes.find(n => n.id === id)
-      console.log('id', id, this.dg.nodes())
       const pos = this.dg.node(id)
       node.setPostion(pos.x, pos.y)
     })
